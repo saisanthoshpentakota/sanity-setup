@@ -1,2 +1,4 @@
 node_modules/
 dist/
+todo.txt
+.env
