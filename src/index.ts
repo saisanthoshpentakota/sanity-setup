@@ -24,7 +24,7 @@ async function setupSanity(logger: LoggerService, config: ConfigService) {
   const variantManager = new VariantManager();
   const metricManager = new MetricManager();
   
-  const project = await projectManager.createProject('automating sanity-test-145', 'this is a test');
+  const project = await projectManager.createProject('automating sanity-test-199', 'this is a test');
   if (project.isErr()) return;
   const projectUid = project.value.uid;
 
