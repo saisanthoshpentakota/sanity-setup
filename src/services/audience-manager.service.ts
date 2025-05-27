@@ -7,7 +7,8 @@ import {
 
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
-import { Audience } from './types';
+import { Audience } from '../types';
+
 
 export class AudienceManager {
   private apiClient: AxiosInstance;
@@ -50,5 +51,5 @@ export class AudienceManager {
       return err(error);
     }
   }
-  
+
 }

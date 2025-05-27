@@ -1,16 +1,16 @@
-import { AnalyticsPopulator } from './analytics-populator.service';
-import { AttributeManager } from './attribute-manager.service';
-import { AudienceManager } from './audience-manager.service';
-import { ConfigService } from './config.service';
-import { EventManager } from './event-manager.service';
-import { ExperienceManager } from './experience-manager.service';
+import { AnalyticsPopulator } from './services/analytics-populator.service';
+import { AttributeManager } from './services/attribute-manager.service';
+import { AudienceManager } from './services/audience-manager.service';
+import { ConfigService } from './services/config.service';
+import { EventManager } from './services/event-manager.service';
+import { ExperienceManager } from './services/experience-manager.service';
 import {
   ShortUsCitizen,
   TallUsCitizen,
-} from './helpers';
-import { LoggerService } from './logger.service';
-import { MetricManager } from './metric-manager.service';
-import { ProjectManager } from './project-manager.service';
+} from './lib/helpers';
+import { LoggerService } from './services/logger.service';
+import { MetricManager } from './services/metric-manager.service';
+import { ProjectManager } from './services/project-manager.service';
 import { VariantManager } from './variant-manager.service';
 
 async function setupSanity(logger: LoggerService, config: ConfigService) {
@@ -23,7 +23,7 @@ async function setupSanity(logger: LoggerService, config: ConfigService) {
   const experienceManager = new ExperienceManager(logger, config);
   const variantManager = new VariantManager();
   const metricManager = new MetricManager();
-  
+
   const project = await projectManager.createProject('automating sanity-test-199', 'this is a test');
   if (project.isErr()) return;
   const projectUid = project.value.uid;

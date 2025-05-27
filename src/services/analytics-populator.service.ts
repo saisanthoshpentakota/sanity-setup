@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-
-import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
+import { ConfigService } from './config.service';
+
 
 export class AnalyticsPopulator {
   private apiClient: AxiosInstance;
@@ -52,7 +52,7 @@ export class AnalyticsPopulator {
     }
   }
 
-  private triggerEvent(eventKey: string): void {}
+  private triggerEvent(eventKey: string): void { }
 
   private generateRandomUid(): string {
     return Math.random().toString(36).substring(2, 15);

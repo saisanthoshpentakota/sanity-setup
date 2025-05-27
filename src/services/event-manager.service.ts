@@ -7,7 +7,7 @@ import {
 
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
-import { Event } from './types';
+import { Event } from '../types';
 
 export class EventManager {
   private apiClient: AxiosInstance;

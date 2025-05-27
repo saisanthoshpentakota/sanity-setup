@@ -7,7 +7,7 @@ import {
 
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
-import { Project } from './types';
+import { Project } from '../types';
 
 export class ProjectManager {
   private apiClient: AxiosInstance;

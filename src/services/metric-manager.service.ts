@@ -1,7 +1,7 @@
-import { Metric } from './types';
+import { Metric } from '../types';
 
 export class MetricManager {
-  constructor() {}
+  constructor() { }
 
   createMetric(name: string, event: string): Metric {
     return {

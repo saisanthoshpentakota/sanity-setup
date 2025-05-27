@@ -1,10 +1,12 @@
-import { ConfigService } from './config.service';
-import { EventManager } from './event-manager.service';
-import { ExperienceManager } from './experience-manager.service';
-import { LoggerService } from './logger.service';
-import { MetricManager } from './metric-manager.service';
-import { ProjectManager } from './project-manager.service';
-import { VariantManager } from './variant-manager.service';
+import { ConfigService } from "./services/config.service";
+import { EventManager } from "./services/event-manager.service";
+import { ExperienceManager } from "./services/experience-manager.service";
+import { LoggerService } from "./services/logger.service";
+import { MetricManager } from "./services/metric-manager.service";
+import { ProjectManager } from "./services/project-manager.service";
+import { VariantManager } from "./variant-manager.service";
+
+;
 
 async function setupSanity(config: ConfigService, logger: LoggerService) {
   logger.log('Setting up sanity...');

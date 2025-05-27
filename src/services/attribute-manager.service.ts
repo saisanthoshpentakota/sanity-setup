@@ -7,7 +7,8 @@ import {
 
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
-import { Attribute } from './types';
+import { Attribute } from '../types';
+
 
 export class AttributeManager {
   private apiClient: AxiosInstance;

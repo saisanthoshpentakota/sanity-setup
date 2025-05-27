@@ -11,7 +11,7 @@ import {
   Experience,
   ExperienceVersion,
   Metric,
-} from './types';
+} from '../types';
 
 export class ExperienceManager {
   private apiClient: AxiosInstance;
