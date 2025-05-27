@@ -44,12 +44,13 @@ export class SanitySetupService {
     await this.setupSegmentedExperience(projectUid, tallAudienceUid, shortAudienceUid);
     await this.setupABTestExperience(projectUid, eventUid);
     await this.populateAnalytics(projectUid);
+    await this.setupCmsSyncExperience(projectUid, tallAudienceUid, shortAudienceUid);
 
     this.logger.success('Sanity setup complete');
   }
 
   private async setupProject(): Promise<string> {
-    const project = await this.projectManager.createProject('automating sanity-test-asdasda', 'this is a test');
+    const project = await this.projectManager.createProject('e2e-sanity-project', '');
     if (project.isErr()) throw new Error('Failed to create project');
     return project.value.uid;
   }
@@ -170,5 +171,45 @@ export class SanitySetupService {
   private async populateAnalytics(projectUid: string): Promise<void> {
     this.analyticsPopulator = new AnalyticsPopulator(projectUid, this.logger, this.config);
     await this.analyticsPopulator.populateAnalytics('checkout');
+  }
+
+  private async setupCmsSyncExperience(projectUid: string, tallAudienceUid: string, shortAudienceUid: string): Promise<void> {
+    const segmentedExperience = await this.experienceManager.createExperience('CMS Sync Order', '', 'SEGMENTED', projectUid);
+    if (segmentedExperience.isErr()) throw new Error('Failed to create segmented experience');
+    const segmentedExperienceUid = segmentedExperience.value.uid;
+
+    const segmentedDraftExperienceResult = await this.experienceManager.fetchDraftVersion(segmentedExperienceUid, projectUid);
+    if (segmentedDraftExperienceResult.isErr()) throw new Error('Failed to fetch draft version');
+    const segmentedDraftExperienceUid = segmentedDraftExperienceResult.value.uid;
+
+    const Var1 = this.variantManager.createSegmentedVariant('Var1', 'AND', [tallAudienceUid]);
+    const Var2 = this.variantManager.createSegmentedVariant('Var2', 'AND', [shortAudienceUid]);
+    const Var3 = this.variantManager.createSegmentedVariant('Var3', 'AND', [tallAudienceUid, shortAudienceUid]);
+
+    const updateSegmentedExperienceResult = await this.experienceManager.updateVersionedExperience(
+      'DRAFT',
+      [Var1, Var2, Var3],
+      segmentedExperienceUid,
+      segmentedDraftExperienceUid,
+      projectUid
+    );
+    if (updateSegmentedExperienceResult.isErr()) throw new Error('Failed to update segmented experience');
+
+    const updatedSegmentedExperience = updateSegmentedExperienceResult.value;
+
+    this.logger.log('Swapping first and second variants')
+    const variants = [...updatedSegmentedExperience.variants];
+    [variants[0], variants[1]] = [variants[1], variants[0]];
+    const rearrangedVariants = variants;
+
+    const rearrangedSegExperience = await this.experienceManager.updateVersionedExperience(
+      'DRAFT',
+      rearrangedVariants,
+      segmentedExperienceUid,
+      segmentedDraftExperienceUid,
+      projectUid
+    );
+    if (rearrangedSegExperience.isErr()) throw new Error('Failed to update rearranged experience');
+    this.logger.success('Swapped first and second variants')
   }
 } 
