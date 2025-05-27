@@ -1,147 +1,18 @@
-import { AnalyticsPopulator } from './services/analytics-populator.service';
-import { AttributeManager } from './services/attribute-manager.service';
-import { AudienceManager } from './services/audience-manager.service';
 import { ConfigService } from './services/config.service';
-import { EventManager } from './services/event-manager.service';
-import { ExperienceManager } from './services/experience-manager.service';
-import {
-  ShortUsCitizen,
-  TallUsCitizen,
-} from './lib/helpers';
 import { LoggerService } from './services/logger.service';
-import { MetricManager } from './services/metric-manager.service';
-import { ProjectManager } from './services/project-manager.service';
-import { VariantManager } from './variant-manager.service';
+import { SanitySetupService } from './services/sanity-setup.service';
 
-async function setupSanity(logger: LoggerService, config: ConfigService) {
-  logger.log('Setting up sanity...');
+async function main() {
+  const logger = LoggerService.getInstance();
+  const config = ConfigService.getInstance();
+  const sanitySetup = new SanitySetupService(logger, config);
 
-  const projectManager = new ProjectManager(logger, config);
-  const eventManager = new EventManager(logger, config);
-  const attributeManager = new AttributeManager(logger, config);
-  const audienceManager = new AudienceManager(logger, config);
-  const experienceManager = new ExperienceManager(logger, config);
-  const variantManager = new VariantManager();
-  const metricManager = new MetricManager();
-
-  const project = await projectManager.createProject('automating sanity-test-199', 'this is a test');
-  if (project.isErr()) return;
-  const projectUid = project.value.uid;
-
-  const event = await eventManager.createEvent('checkout', 'defines checkout event', projectUid);
-  if (event.isErr()) return;
-  const eventUid = event.value.uid;
-
-  const attribute = await attributeManager.createAttribute(
-    'height',
-    'height',
-    'defines height of the audience',
-    projectUid
-  );
-  if (attribute.isErr()) return;
-  const attributeUid = attribute.value.uid;
-
-  const tallAudienceData = TallUsCitizen(attributeUid);
-  const tallAudience = await audienceManager.createAudience(
-    tallAudienceData.name,
-    tallAudienceData.description,
-    tallAudienceData.definition,
-    projectUid
-  );
-  if (tallAudience.isErr()) return;
-
-  const tallAudienceUid = tallAudience.value.uid;
-
-  const shortAudienceData = ShortUsCitizen(attributeUid);
-  const shortAudience = await audienceManager.createAudience(
-    shortAudienceData.name,
-    shortAudienceData.description,
-    shortAudienceData.definition,
-    projectUid
-  );
-  if (shortAudience.isErr()) return;
-
-  const shortAudienceUid = shortAudience.value.uid;
-
-  const segmentedExperience = await experienceManager.createExperience('Shoe Plaze', '', 'SEGMENTED', projectUid);
-  if (segmentedExperience.isErr()) return;
-  const segmentedExperienceUid = segmentedExperience.value.uid;
-
-  const segmentedDraftExperienceResult = await experienceManager.fetchDraftVersion(segmentedExperienceUid, projectUid);
-  if (segmentedDraftExperienceResult.isErr()) return;
-  const segmentedDraftExperienceUid = segmentedDraftExperienceResult.value.uid;
-
-  const recommenedJordanVariant = variantManager.createSegmentedVariant('Recommend Jordan', 'AND', [tallAudienceUid]);
-  const recommendNikeVariant = variantManager.createSegmentedVariant('Recommend Nike Airforce', 'AND', [
-    shortAudienceUid,
-  ]);
-
-  const updateSegmentedExperienceResult = await experienceManager.updateVersionedExperience(
-    'DRAFT',
-    [recommenedJordanVariant, recommendNikeVariant],
-    segmentedExperienceUid,
-    segmentedDraftExperienceUid,
-    projectUid
-  );
-  if (updateSegmentedExperienceResult.isErr()) return;
-
-  const activateExperienceResult = await experienceManager.activateExperience(
-    updateSegmentedExperienceResult.value,
-    segmentedDraftExperienceUid,
-    segmentedExperienceUid,
-    projectUid
-  );
-  if (activateExperienceResult.isErr()) return;
-
-  const pauseSegmentedExperienceResult = await experienceManager.pauseExperience(
-    activateExperienceResult.value,
-    segmentedDraftExperienceUid,
-    segmentedExperienceUid,
-    projectUid
-  );
-  if (pauseSegmentedExperienceResult.isErr()) return;
-
-  const abTestExperience = await experienceManager.createExperience('Special Offer', '', 'AB_TEST', projectUid);
-  if (abTestExperience.isErr()) return;
-  const abTestExperienceUid = abTestExperience.value.uid;
-
-  const abTestDraftExperienceResult = await experienceManager.fetchDraftVersion(abTestExperienceUid, projectUid);
-  if (abTestDraftExperienceResult.isErr()) return;
-  const abTestDraftExperienceUid = abTestDraftExperienceResult.value.uid;
-
-  const fiftyPercentOfferVariant = variantManager.createABTestVariant('50% Offer', 50);
-  const buyOneGetOneVariant = variantManager.createABTestVariant('Buy One Get One', 50);
-  const checkoutMetric = metricManager.createMetric('checkout', eventUid);
-
-  const updateAbTestExperienceResult = await experienceManager.updateVersionedExperience(
-    'DRAFT',
-    [buyOneGetOneVariant, fiftyPercentOfferVariant],
-    abTestExperienceUid,
-    abTestDraftExperienceUid,
-    projectUid,
-    "EQUALLY_SPLIT",
-    [checkoutMetric]
-  );
-
-  if (updateAbTestExperienceResult.isErr()) return;
-
-  const updatedAbTestExperience = updateAbTestExperienceResult.value;
-
-  const activateAbTestExperienceResult = await experienceManager.activateExperience(
-    updatedAbTestExperience,
-    abTestDraftExperienceUid,
-    abTestExperienceUid,
-    projectUid
-  );
-  if (activateAbTestExperienceResult.isErr()) return;
-
-  const analyticsPopulator = new AnalyticsPopulator(projectUid, logger, config);
-  await analyticsPopulator.populateAnalytics('checkout');
-
-  logger.success('Sanity setup complete');
+  try {
+    await sanitySetup.setup();
+  } catch (error) {
+    logger.error('Failed to setup sanity:', error);
+    process.exit(1);
+  }
 }
 
-const logger = LoggerService.getInstance();
-const config = ConfigService.getInstance();
-
-setupSanity(logger, config);
+main();

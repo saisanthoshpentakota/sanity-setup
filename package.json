@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap",
-    "start": "node dist/index.js",
+    "start": "npm run build && node dist/index.js",
     "setup": "npm run build && npm run start",
     "build-analytics-sanity": "tsup src/setup-analytics-sanity.ts --format cjs,esm --dts --sourcemap",
     "start-analytics-sanity": "node dist/setup-analytics-sanity.js",
