@@ -5,13 +5,13 @@ import {
   Result,
 } from 'neverthrow';
 
-import { ConfigService } from './config.service';
-import { LoggerService } from './logger.service';
 import {
   Experience,
   ExperienceVersion,
   Metric,
 } from '../types';
+import { ConfigService } from './config.service';
+import { LoggerService } from './logger.service';
 
 export class ExperienceManager {
   private apiClient: AxiosInstance;
@@ -157,6 +157,31 @@ export class ExperienceManager {
       this.logger.error(error);
       return err(error);
     }
+  }
+
+  async getShortUid(expUid: string, projectUid: string): Promise<Result<string | null, Error>>{
+    this.logger.log('Fetching experiences');
+
+    try { 
+      const result = await this.apiClient.get<Experience[]>('/experiences', {
+        headers: {
+          'X-Project-Uid': projectUid
+        }
+      })
+
+      const matchingExp = result.data.find((exp) => exp.uid === expUid);
+
+      if (!matchingExp) {
+        this.logger.error(`No Matching Exp found for ${expUid}`)
+        return err(new Error(`No Matching Exp found for ${expUid}`))
+      }
+
+      return ok(matchingExp.shortUid);
+    } catch (error: any) {
+      this.logger.error(error);
+      return err(error)
+    }
+    
   }
 
   private async fetchExperienceVersions(

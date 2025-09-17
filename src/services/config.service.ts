@@ -30,6 +30,14 @@ export class ConfigService {
     return this.get('EDGE_API_URL');
   }
 
+  public getLyticsAccountId(): string{
+    return this.get('LYTICS_ACCOUNT_ID');
+  }
+
+  public getPersonalizeProjectId(): string{
+    return this.get('PERSONALIZE_PROJECT_ID');
+  }
+
   private get(key: string): string {
     const value = process.env[key];
     if (!value) {

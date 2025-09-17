@@ -25,11 +25,14 @@ export type Audience = {
   name: string;
   description: string;
   project: string;
+  slug?: string;
+  source: string
 };
 
 export type Experience = {
   uid: string;
   name: string;
+  shortUid: string;
   description: string;
   project: string;
 };
@@ -46,6 +49,7 @@ export type SegmentedVariant = {
   name: string;
   audiences: string[];
   audienceCombinationType: 'AND' | 'OR';
+  lyticsAudiences?: string[]
 };
 
 export type ABTestVariant = {

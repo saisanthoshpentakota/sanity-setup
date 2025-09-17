@@ -5,10 +5,9 @@ import {
   Result,
 } from 'neverthrow';
 
+import { Audience } from '../types';
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
-import { Audience } from '../types';
-
 
 export class AudienceManager {
   private apiClient: AxiosInstance;
@@ -52,4 +51,20 @@ export class AudienceManager {
     }
   }
 
+  async fetchAudiences(projectId: string): Promise<Result<Audience[], Error>> {
+    this.logger.log(`Fetching audiences from project: ${projectId}`);
+
+    try {
+      const result = await this.apiClient.get<Audience[]>('/audiences?includeLyticsAudiences=true', {
+        headers: {
+          'X-Project-Uid': projectId,
+        },
+      });
+
+      return ok(result.data);
+    } catch (error: any) {
+      this.logger.error(error);
+      return err(error);
+    }
+  }
 }

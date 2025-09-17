@@ -8,7 +8,9 @@
     "setup": "npm run build && npm run start",
     "build-analytics-sanity": "tsup src/setup-analytics-sanity.ts --format cjs,esm --dts --sourcemap",
     "start-analytics-sanity": "node dist/setup-analytics-sanity.js",
-    "setup-analytics-sanity": "npm run build-analytics-sanity && npm run start-analytics-sanity"
+    "setup-analytics-sanity": "npm run build-analytics-sanity && npm run start-analytics-sanity",
+    "build-lytics-demo": "tsup src/setup-lytics-demo.ts --format cjs,esm --dts --sourcemap",
+    "setup-lytics-demo": "node dist/setup-lytics-demo.js"
   },
   "keywords": [],
   "author": "",

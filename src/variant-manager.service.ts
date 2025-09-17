@@ -9,13 +9,15 @@ export class VariantManager {
   createSegmentedVariant(
     name: string,
     audienceCombinationType: SegmentedVariant['audienceCombinationType'],
-    audiences: SegmentedVariant['audiences']
+    audiences: SegmentedVariant['audiences'],
+    lyticsAudiences?: string[]
   ): SegmentedVariant {
     return {
       name,
       __type: 'SegmentedVariant',
       audienceCombinationType,
       audiences,
+      lyticsAudiences,
     };
   }
 
