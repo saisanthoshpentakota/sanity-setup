@@ -2,15 +2,13 @@ import { AnalyticsPopulator } from './services/analytics-populator.service';
 import { ConfigService } from './services/config.service';
 import { LoggerService } from './services/logger.service';
 
-const PROJECT_UID = '6912f71022c7cad7bc578750';
-const EXP_SHORT_UID = '0';
-const VARIANT_SHORT_UID = '1';
-const EVENT_KEY = 'metric';
-const IMPRESSIONS = 100;
-const CONVERSIONS = 50;
+const EXP_SHORT_UID = '0'; //experience shortUID
+const VARIANT_SHORT_UID = '1'; // variant shortUID
+const EVENT_KEY = 'metric'; // ignore this if only populating impressions
+const IMPRESSIONS = 100; // number of impressions to populate
+const CONVERSIONS = 50; //ignore this if only populating impressions
 
 async function populateAnalytics(
-  projectUid: string,
   eventKey: string,
   impressions: number = 100,
   conversions: number = 0,
@@ -19,6 +17,7 @@ async function populateAnalytics(
 ) {
   const config = ConfigService.getInstance();
   const logger = LoggerService.getInstance();
+  const projectUid = config.getPersonalizeProjectId();
 
   logger.log(`Starting analytics population for project: ${projectUid}`);
   logger.log(`Event Key: ${eventKey}`);
@@ -30,4 +29,4 @@ async function populateAnalytics(
   await analyticsPopulator.populateAnalytics(eventKey, impressions, conversions, experienceShortUid, variantShortUid);
 }
 
-populateAnalytics(PROJECT_UID, EVENT_KEY, IMPRESSIONS, CONVERSIONS, EXP_SHORT_UID, VARIANT_SHORT_UID);
+populateAnalytics(EVENT_KEY, IMPRESSIONS, CONVERSIONS, EXP_SHORT_UID, VARIANT_SHORT_UID);
