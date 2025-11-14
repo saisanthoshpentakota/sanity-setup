@@ -38,6 +38,28 @@ export class ConfigService {
     return this.get('PERSONALIZE_PROJECT_ID');
   }
 
+  public getAnalyticsExpShortUid(): string {
+    return this.getOptional('ANALYTICS_EXP_SHORT_UID', '0');
+  }
+
+  public getAnalyticsVariantShortUid(): string {
+    return this.getOptional('ANALYTICS_VARIANT_SHORT_UID', '1');
+  }
+
+  public getAnalyticsEventKey(): string {
+    return this.getOptional('ANALYTICS_EVENT_KEY', 'metric');
+  }
+
+  public getAnalyticsImpressions(): number {
+    const value = this.getOptional('ANALYTICS_IMPRESSIONS', '100');
+    return parseInt(value, 10);
+  }
+
+  public getAnalyticsConversions(): number {
+    const value = this.getOptional('ANALYTICS_CONVERSIONS', '50');
+    return parseInt(value, 10);
+  }
+
   private get(key: string): string {
     const value = process.env[key];
     if (!value) {
@@ -45,5 +67,9 @@ export class ConfigService {
     }
 
     return value;
+  }
+
+  private getOptional(key: string, defaultValue: string): string {
+    return process.env[key] || defaultValue;
   }
 }

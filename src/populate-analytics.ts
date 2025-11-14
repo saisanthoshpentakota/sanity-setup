@@ -2,12 +2,6 @@ import { AnalyticsPopulator } from './services/analytics-populator.service';
 import { ConfigService } from './services/config.service';
 import { LoggerService } from './services/logger.service';
 
-const EXP_SHORT_UID = '0'; //experience shortUID
-const VARIANT_SHORT_UID = '1'; // variant shortUID
-const EVENT_KEY = 'metric'; // ignore this if only populating impressions
-const IMPRESSIONS = 100; // number of impressions to populate
-const CONVERSIONS = 50; //ignore this if only populating impressions
-
 async function populateAnalytics(
   eventKey: string,
   impressions: number = 100,
@@ -29,4 +23,11 @@ async function populateAnalytics(
   await analyticsPopulator.populateAnalytics(eventKey, impressions, conversions, experienceShortUid, variantShortUid);
 }
 
-populateAnalytics(EVENT_KEY, IMPRESSIONS, CONVERSIONS, EXP_SHORT_UID, VARIANT_SHORT_UID);
+const config = ConfigService.getInstance();
+const eventKey = config.getAnalyticsEventKey();
+const impressions = config.getAnalyticsImpressions();
+const conversions = config.getAnalyticsConversions();
+const expShortUid = config.getAnalyticsExpShortUid();
+const variantShortUid = config.getAnalyticsVariantShortUid();
+
+populateAnalytics(eventKey, impressions, conversions, expShortUid, variantShortUid);
