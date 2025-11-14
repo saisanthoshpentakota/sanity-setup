@@ -2,6 +2,7 @@
   "name": "setup-sanity",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --sourcemap",
     "start": "npm run build && node dist/index.js",
