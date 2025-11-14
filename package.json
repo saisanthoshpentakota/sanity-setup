@@ -10,7 +10,9 @@
     "start-analytics-sanity": "node dist/setup-analytics-sanity.js",
     "setup-analytics-sanity": "npm run build-analytics-sanity && npm run start-analytics-sanity",
     "build-lytics-demo": "tsup src/setup-lytics-demo.ts --format cjs,esm --dts --sourcemap",
-    "setup-lytics-demo": "node dist/setup-lytics-demo.js"
+    "setup-lytics-demo": "node dist/setup-lytics-demo.js",
+    "build-populate-analytics": "tsup src/populate-analytics.ts --format cjs,esm --dts --sourcemap",
+    "populate-analytics": "npm run build-populate-analytics && node dist/populate-analytics.js"
   },
   "keywords": [],
   "author": "",

@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import { LoggerService } from './logger.service';
-import { ConfigService } from './config.service';
 
+import { ConfigService } from './config.service';
+import { LoggerService } from './logger.service';
 
 export class AnalyticsPopulator {
   private apiClient: AxiosInstance;
@@ -16,18 +16,23 @@ export class AnalyticsPopulator {
     });
   }
 
-  async populateAnalytics(eventKey: string): Promise<void> {
-    this.logger.log('Populating analytics...');
+  async populateAnalytics(
+    eventKey: string, 
+    impressions: number = 100,
+    experienceShortUid: string = '0',
+    variantShortUid: string = '0'
+  ): Promise<void> {
+    this.logger.log(`Populating analytics with ${impressions} impressions...`);
     let promises: any = [];
 
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < impressions; i++) {
       promises.push(
         this.apiClient.post(
           '/events',
           [
             {
-              experienceShortUid: '1',
-              variantShortUid: '1',
+              experienceShortUid,
+              variantShortUid,
               type: 'IMPRESSION',
             },
             {
@@ -46,13 +51,11 @@ export class AnalyticsPopulator {
     try {
       await Promise.all(promises);
 
-      this.logger.success('Analytics populated');
+      this.logger.success(`Analytics populated with ${impressions} impressions`);
     } catch (error: any) {
       this.logger.error(error);
     }
   }
-
-  private triggerEvent(eventKey: string): void { }
 
   private generateRandomUid(): string {
     return Math.random().toString(36).substring(2, 15);
