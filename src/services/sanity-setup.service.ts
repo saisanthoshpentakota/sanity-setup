@@ -1,3 +1,8 @@
+import {
+  ShortUsCitizen,
+  TallUsCitizen,
+} from '../lib/helpers';
+import { VariantManager } from '../variant-manager.service';
 import { AnalyticsPopulator } from './analytics-populator.service';
 import { AttributeManager } from './attribute-manager.service';
 import { AudienceManager } from './audience-manager.service';
@@ -7,8 +12,6 @@ import { ExperienceManager } from './experience-manager.service';
 import { LoggerService } from './logger.service';
 import { MetricManager } from './metric-manager.service';
 import { ProjectManager } from './project-manager.service';
-import { VariantManager } from '../variant-manager.service';
-import { ShortUsCitizen, TallUsCitizen } from '../lib/helpers';
 
 export class SanitySetupService {
   private projectManager: ProjectManager;
@@ -170,7 +173,7 @@ export class SanitySetupService {
 
   private async populateAnalytics(projectUid: string): Promise<void> {
     this.analyticsPopulator = new AnalyticsPopulator(projectUid, this.logger, this.config);
-    await this.analyticsPopulator.populateAnalytics('checkout');
+    await this.analyticsPopulator.populateAnalytics('checkout', 100, 50);
   }
 
   private async setupCmsSyncExperience(projectUid: string, tallAudienceUid: string, shortAudienceUid: string): Promise<void> {

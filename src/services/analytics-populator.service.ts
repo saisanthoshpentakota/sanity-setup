@@ -19,27 +19,33 @@ export class AnalyticsPopulator {
   async populateAnalytics(
     eventKey: string, 
     impressions: number = 100,
+    conversions: number = 0,
     experienceShortUid: string = '0',
     variantShortUid: string = '0'
   ): Promise<void> {
-    this.logger.log(`Populating analytics with ${impressions} impressions...`);
+    this.logger.log(`Populating analytics with ${impressions} impressions and ${conversions} conversions...`);
     let promises: any = [];
 
     for (let i = 0; i < impressions; i++) {
+      const events: any[] = [
+        {
+          experienceShortUid,
+          variantShortUid,
+          type: 'IMPRESSION',
+        },
+      ];
+
+      if (i < conversions) {
+        events.push({
+          eventKey: eventKey,
+          type: 'EVENT',
+        });
+      }
+
       promises.push(
         this.apiClient.post(
           '/events',
-          [
-            {
-              experienceShortUid,
-              variantShortUid,
-              type: 'IMPRESSION',
-            },
-            {
-              eventKey: eventKey,
-              type: 'EVENT',
-            },
-          ],
+          events,
           {
             headers: {
               'x-cs-personalize-user-uid': this.generateRandomUid(),
@@ -51,7 +57,7 @@ export class AnalyticsPopulator {
     try {
       await Promise.all(promises);
 
-      this.logger.success(`Analytics populated with ${impressions} impressions`);
+      this.logger.success(`Analytics populated with ${impressions} impressions and ${conversions} conversions`);
     } catch (error: any) {
       this.logger.error(error);
     }
