@@ -42,6 +42,10 @@ export class ConfigService {
     return this.get('PERSONALIZE_PROJECT_ID');
   }
 
+  public getAnalyticsProjectName(): string {
+    return this.getOptional('ANALYTICS_PROJECT_NAME', 'e2e-fastly-sanity-project');
+  }
+
   public getAnalyticsExpShortUid(): string {
     return this.getOptional('ANALYTICS_EXP_SHORT_UID', '0');
   }

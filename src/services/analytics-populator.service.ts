@@ -20,7 +20,7 @@ export class AnalyticsPopulator {
     eventKey: string, 
     impressions: number = 100,
     conversions: number = 0,
-    experienceShortUid: string = '0',
+    experienceShortUid: string = '1',
     variantShortUid: string = '0'
   ): Promise<void> {
     this.logger.log(`Populating analytics with ${impressions} impressions and ${conversions} conversions...`);
