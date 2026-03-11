@@ -30,6 +30,10 @@ export class ConfigService {
     return this.get('EDGE_API_URL');
   }
 
+  public getCmsApiUrl(): string {
+    return this.get('CMS_API_URL');
+  }
+
   public getLyticsAccountId(): string{
     return this.get('LYTICS_ACCOUNT_ID');
   }

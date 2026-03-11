@@ -12,8 +12,10 @@ import { ExperienceManager } from './experience-manager.service';
 import { LoggerService } from './logger.service';
 import { MetricManager } from './metric-manager.service';
 import { ProjectManager } from './project-manager.service';
+import { StackManager } from './stack-manager.service';
 
 export class SanitySetupService {
+  private stackManager: StackManager;
   private projectManager: ProjectManager;
   private eventManager: EventManager;
   private attributeManager: AttributeManager;
@@ -27,6 +29,7 @@ export class SanitySetupService {
     private readonly logger: LoggerService,
     private readonly config: ConfigService
   ) {
+    this.stackManager = new StackManager(logger, config);
     this.projectManager = new ProjectManager(logger, config);
     this.eventManager = new EventManager(logger, config);
     this.attributeManager = new AttributeManager(logger, config);
@@ -39,7 +42,8 @@ export class SanitySetupService {
   async setup(): Promise<void> {
     this.logger.log('Setting up sanity...');
 
-    const projectUid = await this.setupProject();
+    const stackApiKey = await this.setupStack();
+    const projectUid = await this.setupProject(stackApiKey);
     const eventUid = await this.setupEvent(projectUid);
     const attributeUid = await this.setupAttribute(projectUid);
     const { tallAudienceUid, shortAudienceUid } = await this.setupAudiences(attributeUid, projectUid);
@@ -52,8 +56,17 @@ export class SanitySetupService {
     this.logger.success('Sanity setup complete');
   }
 
-  private async setupProject(): Promise<string> {
-    const project = await this.projectManager.createProject('e2e-sanity-project', '');
+  private async setupStack(): Promise<string> {
+    const stack = await this.stackManager.createStack(
+      'e2e-sanity-stack-fastly',
+      'Stack integrated in personalize fastly specific e2e-sanity'
+    );
+    if (stack.isErr()) throw new Error('Failed to create stack');
+    return stack.value.api_key;
+  }
+
+  private async setupProject(connectedStackApiKey: string): Promise<string> {
+    const project = await this.projectManager.createProject('e2e-fastly-sanity-project', '', connectedStackApiKey);
     if (project.isErr()) throw new Error('Failed to create project');
     return project.value.uid;
   }
@@ -101,7 +114,7 @@ export class SanitySetupService {
   }
 
   private async setupSegmentedExperience(projectUid: string, tallAudienceUid: string, shortAudienceUid: string): Promise<void> {
-    const segmentedExperience = await this.experienceManager.createExperience('Shoe Plaze', '', 'SEGMENTED', projectUid);
+    const segmentedExperience = await this.experienceManager.createExperience('Shoe Plaza', '', 'SEGMENTED', projectUid);
     if (segmentedExperience.isErr()) throw new Error('Failed to create segmented experience');
     const segmentedExperienceUid = segmentedExperience.value.uid;
 
@@ -147,13 +160,13 @@ export class SanitySetupService {
     if (abTestDraftExperienceResult.isErr()) throw new Error('Failed to fetch AB test draft version');
     const abTestDraftExperienceUid = abTestDraftExperienceResult.value.uid;
 
-    const fiftyPercentOfferVariant = this.variantManager.createABTestVariant('50% Offer', 50);
-    const buyOneGetOneVariant = this.variantManager.createABTestVariant('Buy One Get One', 50);
+    const fiftyPercentOfferVariant = this.variantManager.createABTestVariant('50% Off', 50);
+    const buyOneGetOneVariant = this.variantManager.createABTestVariant('Buy One, Get One Free', 50);
     const checkoutMetric = this.metricManager.createMetric('checkout', eventUid);
 
     const updateAbTestExperienceResult = await this.experienceManager.updateVersionedExperience(
       'DRAFT',
-      [buyOneGetOneVariant, fiftyPercentOfferVariant],
+      [fiftyPercentOfferVariant, buyOneGetOneVariant],
       abTestExperienceUid,
       abTestDraftExperienceUid,
       projectUid,

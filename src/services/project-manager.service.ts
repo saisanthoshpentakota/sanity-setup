@@ -24,10 +24,14 @@ export class ProjectManager {
     });
   }
 
-  async createProject(name: string, description: string): Promise<Result<Project, Error>> {
+  async createProject(name: string, description: string, connectedStackApiKey?: string): Promise<Result<Project, Error>> {
     this.logger.log('Creating project...');
     try {
-      const result = await this.apiClient.post<Project>('/projects', { name, description });
+      const body: Record<string, string> = { name, description };
+      if (connectedStackApiKey) {
+        body.connectedStackApiKey = connectedStackApiKey;
+      }
+      const result = await this.apiClient.post<Project>('/projects', body);
       this.logger.success('Project created');
 
       return ok(result.data);

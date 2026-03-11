@@ -3,6 +3,14 @@ export type Project = {
   organizationUid: string;
   name: string;
   description: string;
+  connectedStackApiKey?: string;
+};
+
+export type Stack = {
+  api_key: string;
+  name: string;
+  description: string;
+  org_uid: string;
 };
 
 export type Event = {
