@@ -42,8 +42,25 @@ export class SanitySetupService {
   async setup(): Promise<void> {
     this.logger.log('Setting up sanity...');
 
-    const stackApiKey = await this.setupStack();
-    const projectUid = await this.setupProject(stackApiKey);
+    const defaultPair = await this.ensureStackAndProject(
+      'e2e-sanity-stack',
+      'Stack integrated in personalize e2e-sanity',
+      'e2e-sanity-project',
+    );
+
+    const fastlyPair = await this.ensureStackAndProject(
+      'e2e-sanity-stack-fastly',
+      'Stack integrated in personalize fastly specific e2e-sanity',
+      'e2e-fastly-sanity-project',
+    );
+
+    if (defaultPair.alreadyExisted && fastlyPair.alreadyExisted) {
+      this.logger.success('Both stack-project pairs already exist. Nothing to do.');
+      return;
+    }
+
+    const projectUid = fastlyPair.projectUid;
+
     const eventUid = await this.setupEvent(projectUid);
     const attributeUid = await this.setupAttribute(projectUid);
     const { tallAudienceUid, shortAudienceUid } = await this.setupAudiences(attributeUid, projectUid);
@@ -56,19 +73,25 @@ export class SanitySetupService {
     this.logger.success('Sanity setup complete');
   }
 
-  private async setupStack(): Promise<string> {
-    const stack = await this.stackManager.createStack(
-      'e2e-sanity-stack-fastly',
-      'Stack integrated in personalize fastly specific e2e-sanity'
-    );
-    if (stack.isErr()) throw new Error('Failed to create stack');
-    return stack.value.api_key;
-  }
+  private async ensureStackAndProject(
+    stackName: string,
+    stackDescription: string,
+    projectName: string,
+  ): Promise<{ stackApiKey: string; projectUid: string; alreadyExisted: boolean }> {
+    const stack = await this.stackManager.ensureStack(stackName, stackDescription);
+    if (stack.isErr()) throw new Error(`Failed to ensure stack "${stackName}"`);
+    const stackApiKey = stack.value.api_key;
+    const stackExisted = stack.value._existed;
 
-  private async setupProject(connectedStackApiKey: string): Promise<string> {
-    const project = await this.projectManager.createProject('e2e-fastly-sanity-project', '', connectedStackApiKey);
-    if (project.isErr()) throw new Error('Failed to create project');
-    return project.value.uid;
+    const project = await this.projectManager.ensureProject(projectName, '', stackApiKey);
+    if (project.isErr()) throw new Error(`Failed to ensure project "${projectName}"`);
+    const projectExisted = project.value._existed;
+
+    return {
+      stackApiKey,
+      projectUid: project.value.uid,
+      alreadyExisted: stackExisted && projectExisted,
+    };
   }
 
   private async setupEvent(projectUid: string): Promise<string> {

@@ -24,17 +24,50 @@ export class ProjectManager {
     });
   }
 
+  async listProjects(): Promise<Result<Project[], Error>> {
+    this.logger.log('Fetching existing projects...');
+    try {
+      const result = await this.apiClient.get<Project[]>('/projects');
+      return ok(result.data);
+    } catch (error: any) {
+      this.logger.error(error);
+      return err(error);
+    }
+  }
+
+  async findProjectByName(name: string): Promise<Result<Project | null, Error>> {
+    const projectsResult = await this.listProjects();
+    if (projectsResult.isErr()) return err(projectsResult.error);
+
+    const match = projectsResult.value.find((p) => p.name === name);
+    return ok(match ?? null);
+  }
+
+  async ensureProject(name: string, description: string, connectedStackApiKey?: string): Promise<Result<Project, Error>> {
+    this.logger.log(`Ensuring project "${name}" exists...`);
+
+    const existing = await this.findProjectByName(name);
+    if (existing.isErr()) return err(existing.error);
+
+    if (existing.value) {
+      this.logger.success(`Project "${name}" already exists (uid: ${existing.value.uid})`);
+      return ok({ ...existing.value, _existed: true });
+    }
+
+    return this.createProject(name, description, connectedStackApiKey);
+  }
+
   async createProject(name: string, description: string, connectedStackApiKey?: string): Promise<Result<Project, Error>> {
-    this.logger.log('Creating project...');
+    this.logger.log(`Creating project "${name}"...`);
     try {
       const body: Record<string, string> = { name, description };
       if (connectedStackApiKey) {
         body.connectedStackApiKey = connectedStackApiKey;
       }
       const result = await this.apiClient.post<Project>('/projects', body);
-      this.logger.success('Project created');
+      this.logger.success(`Project created: ${name} (uid: ${result.data.uid})`);
 
-      return ok(result.data);
+      return ok({ ...result.data, _existed: false });
     } catch (error: any) {
       this.logger.error(error);
       return err(error);

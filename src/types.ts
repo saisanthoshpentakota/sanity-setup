@@ -4,6 +4,7 @@ export type Project = {
   name: string;
   description: string;
   connectedStackApiKey?: string;
+  _existed: boolean;
 };
 
 export type Stack = {
@@ -11,6 +12,7 @@ export type Stack = {
   name: string;
   description: string;
   org_uid: string;
+  _existed: boolean;
 };
 
 export type Event = {
