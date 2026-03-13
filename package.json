@@ -13,7 +13,9 @@
     "build-lytics-demo": "tsup src/setup-lytics-demo.ts --format cjs,esm --dts --sourcemap",
     "setup-lytics-demo": "node dist/setup-lytics-demo.js",
     "build-populate-analytics": "tsup src/populate-analytics.ts --format cjs,esm --dts --sourcemap",
-    "populate-analytics": "npm run build-populate-analytics && node dist/populate-analytics.js"
+    "populate-analytics": "npm run build-populate-analytics && node dist/populate-analytics.js",
+    "build-populate-analytics-cron": "tsup src/populate-analytics-cron.ts --format cjs,esm --dts --sourcemap",
+    "populate-analytics-cron": "npm run build-populate-analytics-cron && node dist/populate-analytics-cron.js"
   },
   "keywords": [],
   "author": "",
