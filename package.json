@@ -13,7 +13,11 @@
     "build-lytics-demo": "tsup src/setup-lytics-demo.ts --format cjs,esm --dts --sourcemap",
     "setup-lytics-demo": "node dist/setup-lytics-demo.js",
     "build-populate-analytics": "tsup src/populate-analytics.ts --format cjs,esm --dts --sourcemap",
-    "populate-analytics": "npm run build-populate-analytics && node dist/populate-analytics.js"
+    "populate-analytics": "npm run build-populate-analytics && node dist/populate-analytics.js",
+    "build-inline-targeting-project": "tsup src/setup-inline-targeting-project.ts --format cjs,esm --dts --sourcemap",
+    "setup-inline-targeting-project": "npm run build-inline-targeting-project && node dist/setup-inline-targeting-project.js",
+    "build-inline-targeting-fixtures": "tsup src/setup-inline-targeting-fixtures.ts --format cjs,esm --dts --sourcemap",
+    "setup-inline-targeting-fixtures": "npm run build-inline-targeting-fixtures && node dist/setup-inline-targeting-fixtures.js"
   },
   "keywords": [],
   "author": "",

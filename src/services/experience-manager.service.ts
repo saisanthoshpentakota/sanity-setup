@@ -9,6 +9,7 @@ import {
   Experience,
   ExperienceVersion,
   Metric,
+  Targeting,
 } from '../types';
 import { ConfigService } from './config.service';
 import { LoggerService } from './logger.service';
@@ -29,7 +30,8 @@ export class ExperienceManager {
     name: string,
     description: string,
     type: 'SEGMENTED' | 'AB_TEST',
-    projectUid: string
+    projectUid: string,
+    apiVersion?: 2
   ): Promise<Result<Experience, Error>> {
     this.logger.log(`Creating ${name} experience...`);
     try {
@@ -43,6 +45,7 @@ export class ExperienceManager {
         {
           headers: {
             'X-Project-Uid': projectUid,
+            ...this.apiVersionHeader(apiVersion),
           },
         }
       );
@@ -74,7 +77,9 @@ export class ExperienceManager {
     versionUid: string,
     projectUid: string,
     variantSplit?: string,
-    metrics?: Metric[]
+    metrics?: Metric[],
+    apiVersion?: 2,
+    targeting?: Targeting
   ): Promise<Result<ExperienceVersion, Error>> {
     this.logger.log(`Updating experience version...`);
     try {
@@ -85,10 +90,12 @@ export class ExperienceManager {
           variants,
           variantSplit,
           metrics,
+          targeting,
         },
         {
           headers: {
             'X-Project-Uid': projectUid,
+            ...this.apiVersionHeader(apiVersion),
           },
         }
       );
@@ -105,7 +112,8 @@ export class ExperienceManager {
     versionedExperience: ExperienceVersion,
     versionUid: string,
     experienceUid: string,
-    projectUid: string
+    projectUid: string,
+    apiVersion?: 2
   ): Promise<Result<ExperienceVersion, Error>> {
     this.logger.log(`Pausing experience...`);
     try {
@@ -118,6 +126,7 @@ export class ExperienceManager {
         {
           headers: {
             'X-Project-Uid': projectUid,
+            ...this.apiVersionHeader(apiVersion),
           },
         }
       );
@@ -134,7 +143,8 @@ export class ExperienceManager {
     versionedExperience: ExperienceVersion,
     versionUid: string,
     experienceUid: string,
-    projectUid: string
+    projectUid: string,
+    apiVersion?: 2
   ): Promise<Result<ExperienceVersion, Error>> {
     this.logger.log(`Activating experience...`);
     try {
@@ -147,12 +157,30 @@ export class ExperienceManager {
         {
           headers: {
             'X-Project-Uid': projectUid,
+            ...this.apiVersionHeader(apiVersion),
           },
         }
       );
 
       this.logger.success(`Experience activated`);
       return ok(result.data);
+    } catch (error: any) {
+      this.logger.error(error);
+      return err(error);
+    }
+  }
+
+  async findExperienceByName(name: string, projectUid: string): Promise<Result<Experience | null, Error>> {
+    this.logger.log(`Looking up experience "${name}"...`);
+    try {
+      const result = await this.apiClient.get<Experience[]>('/experiences', {
+        headers: {
+          'X-Project-Uid': projectUid,
+        },
+      });
+
+      const match = result.data.find((exp) => exp.name === name);
+      return ok(match ?? null);
     } catch (error: any) {
       this.logger.error(error);
       return err(error);
@@ -182,6 +210,10 @@ export class ExperienceManager {
       return err(error)
     }
     
+  }
+
+  private apiVersionHeader(apiVersion?: 2): Record<string, string> {
+    return apiVersion === 2 ? { 'x-cs-api-version': '2' } : {};
   }
 
   private async fetchExperienceVersions(

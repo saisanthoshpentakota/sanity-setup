@@ -38,6 +38,21 @@ export class ConfigService {
     return this.get('LYTICS_ACCOUNT_ID');
   }
 
+  // Base URL for the Lytics API gateway (segments/flows), fronted by the
+  // main app - e.g. https://<app-host>/lytics-api/api-gateway/v2.
+  public getLyticsGatewayUrl(): string {
+    return this.get('LYTICS_GATEWAY_URL');
+  }
+
+  // Uid of a project that already has a working Lytics connection. The
+  // gateway resolves which Lytics account/token to use from this project's
+  // connection, regardless of which project the resulting data is used for -
+  // needed because e2e-sanity-inline-targeting has no Lytics connection of
+  // its own.
+  public getLyticsProjectUid(): string {
+    return this.get('LYTICS_PROJECT_UID');
+  }
+
   public getPersonalizeProjectId(): string{
     return this.get('PERSONALIZE_PROJECT_ID');
   }
