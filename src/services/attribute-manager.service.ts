@@ -23,6 +23,23 @@ export class AttributeManager {
     });
   }
 
+  async findAttributeByKey(key: string, projectUid: string): Promise<Result<Attribute | null, Error>> {
+    this.logger.log(`Looking up attribute "${key}"...`);
+    try {
+      const result = await this.apiClient.get<Attribute[]>('/attributes', {
+        headers: {
+          'X-Project-Uid': projectUid,
+        },
+      });
+
+      const match = result.data.find((attribute) => attribute.key === key);
+      return ok(match ?? null);
+    } catch (error: any) {
+      this.logger.error(error);
+      return err(error);
+    }
+  }
+
   async createAttribute(
     key: string,
     name: string,
